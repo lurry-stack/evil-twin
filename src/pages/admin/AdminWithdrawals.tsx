@@ -95,9 +95,9 @@ export function AdminWithdrawals() {
             <div key={w.id} className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="text-sm font-black text-foreground">-FRW {fmt(w.amount)}</div>
-                  <div className="text-xs text-green-600 font-semibold">User receives: FRW {fmt(w.amount - (w.fee || 0))}</div>
-                  <div className="text-xs text-muted-foreground">Fee: FRW {fmt(w.fee || 0)} (5%)</div>
+                  <div className="text-sm font-black text-foreground">-RWF {fmt(w.amount)}</div>
+                  <div className="text-xs text-green-600 font-semibold">User receives: RWF {fmt(w.amount - (w.fee || 0))}</div>
+                  <div className="text-xs text-muted-foreground">Fee: RWF {fmt(w.fee || 0)} ({w.amount > 0 ? Math.round(((w.fee || 0) / w.amount) * 100) : 0}%)</div>
                   <div className="text-xs text-muted-foreground truncate">
                     {w.user?.full_name || 'Unknown'} · {w.user?.phone || '—'}
                   </div>

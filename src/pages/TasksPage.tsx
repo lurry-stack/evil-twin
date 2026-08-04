@@ -50,10 +50,11 @@ export function TasksPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  if (!profile) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!profile) navigate('/login', { replace: true });
+  }, [profile, navigate]);
+
+  if (!profile) return null;
 
   const share = async () => {
     const shareData = {

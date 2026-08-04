@@ -93,7 +93,7 @@ export function RegulationPage() {
           <ul className="text-sm text-muted-foreground leading-relaxed space-y-1.5 list-disc pl-4">
             <li>Minimum deposit: 5,000 RWF.</li>
             <li>All VIP plans run for 20 days with daily income.</li>
-            <li>Referral commissions: 20% Level 1, 5% Level 2, 2% Level 3.</li>
+            <li>Referral commissions: 10% Level 1, 5% Level 2, 2% Level 3.</li>
             <li>Withdrawals are processed within 48 hours of approval.</li>
             <li>Withdrawals available Monday to Saturday, 07:00 to 13:00.</li>
           </ul>

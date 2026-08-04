@@ -48,10 +48,11 @@ export function TeamPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  if (!profile) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!profile) navigate('/login', { replace: true });
+  }, [profile, navigate]);
+
+  if (!profile) return null;
 
   const refLink = `${window.location.origin}/register?ref=${profile.referral_code}`;
   const copy = (text: string, label: string) => {
@@ -84,7 +85,7 @@ export function TeamPage() {
         {/* Level summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           {[
-            { label: 'Lv1', count: members.level1.length, pct: '20%' },
+            { label: 'Lv1', count: members.level1.length, pct: '10%' },
             { label: 'Lv2', count: members.level2.length, pct: '5%' },
             { label: 'Lv3', count: members.level3.length, pct: '2%' },
           ].map(({ label, count, pct }) => (
@@ -102,7 +103,7 @@ export function TeamPage() {
             {[
               { label: 'Total Members', value: totalMembers },
               { label: 'Active Members', value: activeMembers },
-              { label: 'Total Referral Commission', value: `FRW ${fmt(profile.total_referral_commission || 0)}`, span: 2 },
+              { label: 'Total Referral Commission', value: `RWF ${fmt(profile.total_referral_commission || 0)}`, span: 2 },
             ].map((s) => (
               <div key={s.label} className={`bg-muted/50 rounded-lg p-2.5 ${s.span === 2 ? 'col-span-2' : ''}`}>
                 <div className="text-xs text-muted-foreground">{s.label}</div>
@@ -147,15 +148,15 @@ export function TeamPage() {
         <div className="bg-muted/30 rounded-xl p-4 mb-4 text-xs text-muted-foreground space-y-1.5">
           <div className="flex items-start gap-1.5">
             <Info className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-            <span>Level 1: You earn <span className="text-primary font-semibold">20%</span> when your direct referral deposits.</span>
+            <span>Level 1: You earn <span className="text-primary font-semibold">10%</span> when your direct referral deposits.</span>
           </div>
           <div className="flex items-start gap-1.5">
             <Info className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
             <span>Level 2: You earn <span className="text-primary font-semibold">5%</span> when their referral deposits.</span>
           </div>
           <div className="flex items-start gap-1.5">
-            <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
-            <span>Level 3: You earn <span className="text-foreground font-semibold">2%</span> when their referral deposits.</span>
+            <Info className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+            <span>Level 3: You earn <span className="text-primary font-semibold">2%</span> when their referral deposits.</span>
           </div>
         </div>
 
@@ -191,7 +192,7 @@ export function TeamPage() {
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-muted-foreground">Deposit</div>
-                    <div className="text-sm font-semibold text-primary">FRW {fmt(m.total_deposit)}</div>
+                    <div className="text-sm font-semibold text-primary">RWF {fmt(m.total_deposit)}</div>
                   </div>
                 </div>
               ))}

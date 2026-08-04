@@ -32,6 +32,7 @@ export function AdminSettings() {
       max_balance_restriction: settings.max_balance_restriction,
       min_withdraw: settings.min_withdraw,
       withdraw_arrival_hours: settings.withdraw_arrival_hours,
+      withdraw_fee_percent: settings.withdraw_fee_percent,
       mtn_ussd_template: settings.mtn_ussd_template,
       airtel_ussd_template: settings.airtel_ussd_template,
       mtn_destination: settings.mtn_destination,
@@ -58,12 +59,15 @@ export function AdminSettings() {
         <Field label="Telegram Admin Link" value={settings.telegram_admin_link || ''} onChange={(v) => setSettings({ ...settings, telegram_admin_link: v })} />
         <Field label="WhatsApp Group Link" value={settings.whatsapp_group_link || ''} onChange={(v) => setSettings({ ...settings, whatsapp_group_link: v })} />
         <div className="grid grid-cols-2 gap-2">
-          <Field label="Min Deposit (FRW)" type="number" value={String(settings.min_deposit)} onChange={(v) => setSettings({ ...settings, min_deposit: Number(v) })} />
+          <Field label="Min Deposit (RWF)" type="number" value={String(settings.min_deposit)} onChange={(v) => setSettings({ ...settings, min_deposit: Number(v) })} />
           <Field label="Max Balance Restriction" type="number" value={String(settings.max_balance_restriction)} onChange={(v) => setSettings({ ...settings, max_balance_restriction: Number(v) })} />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Field label="Min Withdraw (FRW)" type="number" value={String(settings.min_withdraw)} onChange={(v) => setSettings({ ...settings, min_withdraw: Number(v) })} />
+          <Field label="Min Withdraw (RWF)" type="number" value={String(settings.min_withdraw)} onChange={(v) => setSettings({ ...settings, min_withdraw: Number(v) })} />
           <Field label="Withdraw Arrival (hours)" type="number" value={String(settings.withdraw_arrival_hours)} onChange={(v) => setSettings({ ...settings, withdraw_arrival_hours: Number(v) })} />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Withdraw Fee (%)" type="number" value={String(settings.withdraw_fee_percent ?? 20)} onChange={(v) => setSettings({ ...settings, withdraw_fee_percent: Number(v) })} />
         </div>
       </div>
 

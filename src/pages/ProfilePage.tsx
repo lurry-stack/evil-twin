@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { useAuth } from '../lib/auth';
 import { useRouter } from '../lib/router';
@@ -33,10 +34,18 @@ export function ProfilePage() {
   const { profile, signOut, isAdmin } = useAuth();
   const { navigate } = useRouter();
 
-  if (!profile) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!profile) navigate('/login', { replace: true });
+  }, [profile, navigate]);
+
+  if (!profile) return null;
+
+  const initials = (profile.full_name || 'PINONI')
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
     <Layout>
@@ -63,7 +72,7 @@ export function ProfilePage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center shrink-0">
-              <span className="text-white font-black text-xs">RIN</span>
+              <span className="text-white font-black text-sm">{initials}</span>
             </div>
             <div>
               <div className="text-white font-black text-base leading-tight">{profile.full_name || 'PINONI User'}</div>
@@ -76,9 +85,7 @@ export function ProfilePage() {
 
         {/* Quick actions */}
         <div className="mx-3 mt-3 bg-card rounded-xl shadow-sm p-3 border border-border">
-          <div className="mb-2">
-            <span className="text-[11px] bg-primary text-white px-3 py-0.5 rounded-full font-semibold">Lv1</span>
-          </div>
+
           <div className="grid grid-cols-3 gap-1">
             {[
               { label: 'Recharge', icon: ArrowDownToLine, path: '/deposit' },
@@ -124,14 +131,14 @@ export function ProfilePage() {
         <div className="mx-3 mt-3 grid grid-cols-2 gap-2">
           {[
             { label: 'Account balance', value: profile.main_balance || 0 },
-            { label: 'Cumulative balance', value: (profile.total_earnings || 0) + (profile.total_withdraw || 0) },
+            { label: 'Total Earnings', value: profile.total_earnings || 0 },
           ].map(({ label, value }) => (
             <button
               key={label}
               onClick={() => navigate('/records')}
               className="bg-card border border-border rounded-xl p-2.5 text-left active:scale-95 transition-transform shadow-sm"
             >
-              <div className="text-sm font-black text-foreground">FRW {fmt(value)}</div>
+              <div className="text-sm font-black text-foreground">RWF {fmt(value)}</div>
               <div className="text-[11px] text-primary font-semibold mt-0.5">{label} &gt;</div>
             </button>
           ))}

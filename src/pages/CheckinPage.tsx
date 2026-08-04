@@ -26,10 +26,11 @@ export function CheckinPage() {
     });
   }, [profile]);
 
-  if (!profile) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!profile) navigate('/login', { replace: true });
+  }, [profile, navigate]);
+
+  if (!profile) return null;
 
   const checkin = async () => {
     if (todayChecked) return;
@@ -54,7 +55,7 @@ export function CheckinPage() {
     await refreshProfile();
     setTodayChecked(true);
     setClaiming(false);
-    toast.success(`Check-in successful! +FRW ${fmt(reward)}`);
+    toast.success(`Check-in successful! +RWF ${fmt(reward)}`);
   };
 
   const streak = checkins.length;
@@ -75,7 +76,7 @@ export function CheckinPage() {
             <span className="text-sm font-bold text-foreground">How it works</span>
           </div>
           <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-4">
-            <li>Each user gets a random reward between 10–199 FRW.</li>
+            <li>Each user gets a random reward between 10–199 RWF.</li>
             <li>All check-in rewards go directly to your main balance.</li>
             <li>Complete 7 consecutive days for a bonus streak reward.</li>
           </ul>
@@ -105,7 +106,7 @@ export function CheckinPage() {
                     <div className="text-sm font-semibold text-foreground">{c.reward_label || 'Daily check-in'}</div>
                     <div className="text-xs text-muted-foreground">{fmtDate(c.created_at)}</div>
                   </div>
-                  <div className="text-sm font-bold text-primary">+FRW {fmt(c.reward_amount)}</div>
+                  <div className="text-sm font-bold text-primary">+RWF {fmt(c.reward_amount)}</div>
                 </div>
               ))}
             </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase, fmt, fmtDate, Profile } from '../../lib/supabase';
 import { useToast } from '../../lib/toast';
-import { Loader2, Search, ShieldCheck, User as UserIcon, Trash2, Pencil, X, Key } from 'lucide-react';
+import { Loader2, Search, ShieldCheck, User as UserIcon, Trash2, Pencil, X, Key, Lock } from 'lucide-react';
 
 type UserVip = {
   id: string;
@@ -11,6 +11,20 @@ type UserVip = {
   days_paid: number;
   duration_days: number;
   is_active: boolean;
+  created_at: string;
+};
+
+type UserLocked = {
+  id: string;
+  plan_name: string;
+  investment_amount: number;
+  daily_income: number;
+  duration_days: number;
+  days_paid: number;
+  accrued_income: number;
+  total_return: number;
+  is_claimed: boolean;
+  claim_at: string;
   created_at: string;
 };
 
@@ -24,25 +38,23 @@ export function AdminUsers() {
   const [editBalance, setEditBalance] = useState('');
   const [viewingProducts, setViewingProducts] = useState<Profile | null>(null);
   const [userVips, setUserVips] = useState<UserVip[]>([]);
+  const [userLocked, setUserLocked] = useState<UserLocked[]>([]);
   const [loadingVips, setLoadingVips] = useState(false);
   const [resettingPw, setResettingPw] = useState<Profile | null>(null);
   const [newPassword, setNewPassword] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
-    let q = supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(300);
+    let q = supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    if (search.trim()) {
+      const s = search.trim();
+      q = q.or(`full_name.ilike.%${s}%,phone.ilike.%${s}%,referral_code.ilike.%${s}%`);
+    } else {
+      q = q.limit(500);
+    }
     const { data, error } = await q;
     if (error) { toast.error(error.message); setLoading(false); return; }
-    let list = (data || []) as Profile[];
-    if (search.trim()) {
-      const s = search.trim().toLowerCase();
-      list = list.filter((p) =>
-        p.full_name?.toLowerCase().includes(s) ||
-        p.phone?.toLowerCase().includes(s) ||
-        p.referral_code?.toLowerCase().includes(s),
-      );
-    }
-    setRows(list);
+    setRows((data || []) as Profile[]);
     setLoading(false);
   }, [search, toast]);
 
@@ -86,13 +98,14 @@ export function AdminUsers() {
   const viewProducts = async (p: Profile) => {
     setViewingProducts(p);
     setLoadingVips(true);
-    const { data, error } = await supabase
-      .from('user_vips')
-      .select('*')
-      .eq('user_id', p.id)
-      .order('created_at', { ascending: false });
-    if (error) { toast.error(error.message); setLoadingVips(false); return; }
-    setUserVips((data || []) as UserVip[]);
+    const [vRes, lRes] = await Promise.all([
+      supabase.from('user_vips').select('*').eq('user_id', p.id).order('created_at', { ascending: false }),
+      supabase.from('locked_investments').select('*').eq('user_id', p.id).order('created_at', { ascending: false }),
+    ]);
+    if (vRes.error) { toast.error(vRes.error.message); }
+    if (lRes.error) { toast.error(lRes.error.message); }
+    setUserVips((vRes.data || []) as UserVip[]);
+    setUserLocked((lRes.data || []) as UserLocked[]);
     setLoadingVips(false);
   };
 
@@ -103,6 +116,16 @@ export function AdminUsers() {
     setBusy(null);
     if (error) { toast.error(error.message); return; }
     toast.success('Product deleted');
+    if (viewingProducts) viewProducts(viewingProducts);
+  };
+
+  const deleteLocked = async (lockedId: string) => {
+    if (!window.confirm('Delete this locked investment? If unclaimed, the investment amount will be refunded to the user.')) return;
+    setBusy(lockedId);
+    const { error } = await supabase.rpc('admin_delete_locked_investment', { p_locked_id: lockedId });
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Locked investment deleted');
     if (viewingProducts) viewProducts(viewingProducts);
   };
 
@@ -286,10 +309,13 @@ export function AdminUsers() {
             </div>
             {loadingVips ? (
               <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-primary animate-spin" /></div>
-            ) : userVips.length === 0 ? (
+            ) : userVips.length === 0 && userLocked.length === 0 ? (
               <div className="text-center py-4 text-muted-foreground text-sm">No products</div>
             ) : (
               <div className="space-y-2">
+                {userVips.length > 0 && (
+                  <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide pt-1">Current Investments</div>
+                )}
                 {userVips.map((v) => (
                   <div key={v.id} className="bg-muted/40 rounded-xl p-3">
                     <div className="flex items-center justify-between mb-1">
@@ -299,7 +325,7 @@ export function AdminUsers() {
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Investment: FRW {fmt(v.investment_amount)} · Daily: FRW {fmt(v.daily_income)} · Days: {v.days_paid}/{v.duration_days}
+                      Investment: RWF {fmt(v.investment_amount)} · Daily: RWF {fmt(v.daily_income)} · Days: {v.days_paid}/{v.duration_days}
                     </div>
                     <button
                       onClick={() => deleteVip(v.id)}
@@ -307,6 +333,35 @@ export function AdminUsers() {
                       className="w-full mt-2 text-xs font-bold py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 flex items-center justify-center gap-1 disabled:opacity-60"
                     >
                       {busy === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Trash2 className="w-3 h-3" /> Delete Product</>}
+                    </button>
+                  </div>
+                ))}
+                {userLocked.length > 0 && (
+                  <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wide pt-2 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Locked Investments
+                  </div>
+                )}
+                {userLocked.map((l) => (
+                  <div key={l.id} className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-bold text-amber-900">{l.plan_name}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        l.is_claimed ? 'bg-green-100 text-green-700' :
+                        new Date(l.claim_at) <= new Date() ? 'bg-green-100 text-green-700' :
+                        'bg-amber-200 text-amber-800'
+                      }`}>
+                        {l.is_claimed ? 'Claimed' : new Date(l.claim_at) <= new Date() ? 'Ready' : `${l.days_paid}/${l.duration_days}d`}
+                      </span>
+                    </div>
+                    <div className="text-xs text-amber-700">
+                      Amount: RWF {fmt(l.investment_amount)} · Daily: RWF {fmt(l.daily_income)} · Accrued: RWF {fmt(l.accrued_income)} · Total: RWF {fmt(l.total_return)}
+                    </div>
+                    <button
+                      onClick={() => deleteLocked(l.id)}
+                      disabled={busy === l.id}
+                      className="w-full mt-2 text-xs font-bold py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 flex items-center justify-center gap-1 disabled:opacity-60"
+                    >
+                      {busy === l.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Trash2 className="w-3 h-3" /> Delete Locked Investment</>}
                     </button>
                   </div>
                 ))}

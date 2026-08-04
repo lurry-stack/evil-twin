@@ -29,10 +29,19 @@ export function LoginPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: phoneToEmail(phone),
-      password,
-    });
+    let error: Error | null = null;
+    try {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out. Check your connection and try again.')), 15000)
+      );
+      const result = await Promise.race([
+        supabase.auth.signInWithPassword({ email: phoneToEmail(phone), password }),
+        timeout,
+      ]) as Awaited<ReturnType<typeof supabase.auth.signInWithPassword>>;
+      error = result.error;
+    } catch (e) {
+      error = e as Error;
+    }
     setLoading(false);
     if (error) {
       toast.error(error.message);

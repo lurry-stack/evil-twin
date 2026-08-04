@@ -60,7 +60,7 @@ export function HomePage() {
     if (!profile) return;
     supabase.from('settings').select('*').maybeSingle().then(({ data }) => {
       setSettings(data as Settings);
-      if (data?.welcome_message) setShowWelcome(true);
+      if (data?.welcome_message && !sessionStorage.getItem('welcome_dismissed')) setShowWelcome(true);
     });
   }, [profile]);
 
@@ -79,10 +79,11 @@ export function HomePage() {
     );
   }
 
-  if (!profile) {
-    navigate('/login', { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && !profile) navigate('/login', { replace: true });
+  }, [loading, profile, navigate]);
+
+  if (!profile) return null;
 
   return (
     <Layout>
@@ -94,7 +95,7 @@ export function HomePage() {
                 <Megaphone className="w-5 h-5 text-primary" />
                 <span className="font-semibold text-foreground">Welcome to PINONI</span>
               </div>
-              <button onClick={() => setShowWelcome(false)} className="text-muted-foreground">
+              <button onClick={() => { setShowWelcome(false); sessionStorage.setItem('welcome_dismissed', '1'); }} className="text-muted-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -111,7 +112,7 @@ export function HomePage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowWelcome(false)}
+                onClick={() => { setShowWelcome(false); sessionStorage.setItem('welcome_dismissed', '1'); }}
                 className="flex-1 bg-muted text-foreground py-2 rounded-lg text-sm font-medium"
               >
                 Close
@@ -217,7 +218,7 @@ export function HomePage() {
             { label: 'Cumulative Earnings', value: profile.total_earnings || 0 },
           ].map(({ label, value }) => (
             <div key={label} className="glass-card rounded-2xl p-4 relative overflow-hidden select-none">
-              <div className="text-base font-black text-foreground leading-tight">FRW {fmt(value)}</div>
+              <div className="text-base font-black text-foreground leading-tight">RWF {fmt(value)}</div>
               <div className="text-xs text-muted-foreground mt-1">{label}</div>
             </div>
           ))}
@@ -259,7 +260,7 @@ export function HomePage() {
               <div className="text-base font-black text-white" style={{ color: '#FBBF24' }}>
                 PINONI PLANS
               </div>
-              <div className="text-xs text-white/80 mt-0.5">Earn 8% daily income for 20 days</div>
+              <div className="text-xs text-white/80 mt-0.5">Earn 10% daily investment income for 20 days</div>
             </div>
             <div className="bg-white/10 border border-white/20 rounded-full px-3 py-1.5 text-white text-xs font-bold flex items-center gap-1">
               View <ChevronRight className="w-3 h-3" />

@@ -17,15 +17,23 @@ Deno.serve(async (req: Request) => {
   const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const admin = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 
-  const { error } = await admin.rpc('pay_daily_vip_income');
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  const { error: vipError } = await admin.rpc('pay_daily_vip_income');
+  if (vipError) {
+    return new Response(JSON.stringify({ error: vipError.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
-  return new Response(JSON.stringify({ ok: true, message: 'Daily VIP income paid' }), {
+  const { error: lockedError } = await admin.rpc('pay_daily_locked_income');
+  if (lockedError) {
+    return new Response(JSON.stringify({ error: lockedError.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  return new Response(JSON.stringify({ ok: true, message: 'Daily VIP income + locked income paid' }), {
     status: 200,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });

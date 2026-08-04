@@ -39,13 +39,15 @@ export function WithdrawPage() {
     });
   }, [profile]);
 
-  if (!profile) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!profile) navigate('/login', { replace: true });
+  }, [profile, navigate]);
+
+  if (!profile) return null;
 
   const minWithdraw = settings?.min_withdraw || 2000;
   const arrivalHours = settings?.withdraw_arrival_hours || 48;
+  const feePct = settings?.withdraw_fee_percent ?? 20;
 
   const submit = async () => {
     const amt = Number(amount);
@@ -82,7 +84,7 @@ export function WithdrawPage() {
       <div className="p-4 space-y-4">
         <div className="glass-card rounded-2xl p-4">
           <div className="text-xs text-muted-foreground mb-1">Available Balance</div>
-          <div className="text-2xl font-black text-foreground">FRW {fmt(profile.main_balance || 0)}</div>
+          <div className="text-2xl font-black text-foreground">RWF {fmt(profile.main_balance || 0)}</div>
         </div>
 
         {!hasVip && (
@@ -161,7 +163,7 @@ export function WithdrawPage() {
             className="w-full bg-card border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Minimum withdrawal: <span className="font-bold text-foreground">{fmt(minWithdraw)} RWF</span>. A <span className="font-bold text-foreground">5% fee</span> applies.
+            Minimum withdrawal: <span className="font-bold text-foreground">{fmt(minWithdraw)} RWF</span>. A <span className="font-bold text-foreground">{feePct}% fee</span> applies.
           </p>
         </div>
 
@@ -186,12 +188,12 @@ export function WithdrawPage() {
               <span className="font-bold text-foreground">{fmt(Number(amount))} RWF</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Processing Fee (5%)</span>
-              <span className="font-bold text-red-600">-{fmt(Number(amount) * 0.05)} RWF</span>
+              <span className="text-muted-foreground">Processing Fee ({feePct}%)</span>
+              <span className="font-bold text-red-600">-{fmt(Number(amount) * (feePct / 100))} RWF</span>
             </div>
             <div className="border-t border-border pt-1.5 flex justify-between text-xs">
               <span className="text-muted-foreground font-semibold">You Receive</span>
-              <span className="font-black text-primary">{fmt(Number(amount) - Number(amount) * 0.05)} RWF</span>
+              <span className="font-black text-primary">{fmt(Number(amount) - Number(amount) * (feePct / 100))} RWF</span>
             </div>
           </div>
         )}
@@ -208,7 +210,7 @@ export function WithdrawPage() {
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-yellow-800 text-xs flex items-start gap-2">
           <Clock className="w-4 h-4 mt-0.5 shrink-0" />
-          <p>Withdrawals require admin approval. Your balance is deducted immediately upon request. If rejected, the full amount is refunded. A 5% processing fee is deducted from the withdrawal amount.</p>
+          <p>Withdrawals require admin approval. Your balance is deducted immediately upon request. If rejected, the full amount is refunded. A {feePct}% processing fee is deducted from the withdrawal amount.</p>
         </div>
 
         {/* Time window notice */}

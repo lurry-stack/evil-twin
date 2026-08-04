@@ -6,19 +6,20 @@ import { supabase } from '../lib/supabase';
 import {
   ShieldCheck, ArrowLeftRight, Wallet, Users, Crown, ListTodo,
   Settings as SettingsIcon, Gift, Loader2, TrendingUp, Clock, CheckCircle2,
-  XCircle, ChevronLeft, Trophy,
+  XCircle, ChevronLeft, Trophy, Lock,
 } from 'lucide-react';
 import { AdminDeposits } from './admin/AdminDeposits';
 import { AdminWithdrawals } from './admin/AdminWithdrawals';
 import { AdminUsers } from './admin/AdminUsers';
 import { AdminVipPlans } from './admin/AdminVipPlans';
+import { AdminLockedPlans } from './admin/AdminLockedPlans';
 import { AdminTasks } from './admin/AdminTasks';
 import { AdminSettings } from './admin/AdminSettings';
 import { AdminRedeemCodes } from './admin/AdminRedeemCodes';
 
 type TabKey =
   | 'overview' | 'deposits' | 'withdrawals' | 'users'
-  | 'vip' | 'tasks' | 'settings' | 'redeem';
+  | 'vip' | 'locked' | 'tasks' | 'settings' | 'redeem';
 
 const tabs: { key: TabKey; label: string; icon: typeof ShieldCheck }[] = [
   { key: 'overview', label: 'Overview', icon: TrendingUp },
@@ -26,10 +27,11 @@ const tabs: { key: TabKey; label: string; icon: typeof ShieldCheck }[] = [
   { key: 'withdrawals', label: 'Withdrawals', icon: Wallet },
   { key: 'users', label: 'Users', icon: Users },
   { key: 'vip', label: 'VIP Plans', icon: Crown },
+  { key: 'locked', label: 'Locked Plans', icon: Lock },
   { key: 'tasks', label: 'Tasks', icon: ListTodo },
   { key: 'redeem', label: 'Redeem Codes', icon: Gift },
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
-];
+];;
 
 type Stats = {
   totalUsers: number;
@@ -172,6 +174,7 @@ export function AdminPage() {
         {tab === 'withdrawals' && <AdminWithdrawals />}
         {tab === 'users' && <AdminUsers />}
         {tab === 'vip' && <AdminVipPlans />}
+        {tab === 'locked' && <AdminLockedPlans />}
         {tab === 'tasks' && <AdminTasks />}
         {tab === 'redeem' && <AdminRedeemCodes />}
         {tab === 'settings' && <AdminSettings />}

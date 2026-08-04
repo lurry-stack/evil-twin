@@ -33,10 +33,11 @@ export function DepositPage() {
     if (profile?.phone) setPhone(profile.phone);
   }, [profile]);
 
-  if (!profile) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!profile) navigate('/login', { replace: true });
+  }, [profile, navigate]);
+
+  if (!profile) return null;
 
   const ussdTemplate = provider === 'MTN'
     ? (settings?.mtn_ussd_template || '*182*8*1*101010*{amount}#')
@@ -114,7 +115,7 @@ export function DepositPage() {
       <div className="p-4 space-y-4">
         <div className="glass-card rounded-2xl p-4">
           <div className="text-xs text-muted-foreground mb-1">Current Balance</div>
-          <div className="text-2xl font-black text-foreground">FRW {fmt(profile.main_balance || 0)}</div>
+          <div className="text-2xl font-black text-foreground">RWF {fmt(profile.main_balance || 0)}</div>
         </div>
 
         {/* Provider selection */}
@@ -178,31 +179,29 @@ export function DepositPage() {
           ))}
         </div>
 
-        {/* USSD Code */}
-        {amount && Number(amount) > 0 && (
-          <div className="glass-card rounded-2xl p-4 border-2 border-primary/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Smartphone className="w-4 h-4 text-primary" />
-              <span className="text-sm font-bold text-foreground">{provider} USSD Payment Code</span>
-            </div>
-            <div className="text-xs text-muted-foreground mb-1">
-              Dial this code on your phone to pay via {provider} Mobile Money:
-            </div>
-            <div className="bg-black rounded-xl p-3 flex items-center justify-between gap-2">
-              <code className="text-yellow-400 font-mono text-sm font-bold flex-1 break-all">{ussdCode}</code>
-              <button
-                onClick={copyUssd}
-                className="shrink-0 bg-primary text-white rounded-lg p-2 active:scale-90 transition-transform"
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-            <div className="text-xs text-muted-foreground mt-2">
-              <div>Destination name: <span className="font-bold text-foreground">{destination}</span></div>
-              <div className="mt-0.5">Amount: <span className="font-bold text-foreground">{fmt(Number(amount))} RWF</span></div>
-            </div>
+        {/* USSD Code — shown immediately when a provider is selected */}
+        <div className="glass-card rounded-2xl p-4 border-2 border-primary/30">
+          <div className="flex items-center gap-2 mb-2">
+            <Smartphone className="w-4 h-4 text-primary" />
+            <span className="text-sm font-bold text-foreground">{provider} USSD Payment Code</span>
           </div>
-        )}
+          <div className="text-xs text-muted-foreground mb-1">
+            Dial this code on your phone to pay via {provider} Mobile Money:
+          </div>
+          <div className="bg-black rounded-xl p-3 flex items-center justify-between gap-2">
+            <code className="text-yellow-400 font-mono text-sm font-bold flex-1 break-all">{ussdCode}</code>
+            <button
+              onClick={copyUssd}
+              className="shrink-0 bg-primary text-white rounded-lg p-2 active:scale-90 transition-transform"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">
+            <div>Destination name: <span className="font-bold text-foreground">{destination}</span></div>
+            <div className="mt-0.5">Amount: <span className="font-bold text-foreground">{amount && Number(amount) > 0 ? `${fmt(Number(amount))} RWF` : 'Enter amount below'}</span></div>
+          </div>
+        </div>
 
         {/* Phone number */}
         <div>

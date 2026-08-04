@@ -128,6 +128,7 @@ export type Settings = {
   max_balance_restriction: number;
   min_withdraw: number;
   withdraw_arrival_hours: number;
+  withdraw_fee_percent: number;
   mtn_ussd_template: string | null;
   airtel_ussd_template: string | null;
   mtn_destination: string | null;
@@ -145,3 +146,33 @@ export const fmtDate = (s: string) =>
 
 export const maskPhone = (p: string | null) =>
   p ? p.slice(0, 4) + '****' + p.slice(-2) : '****';
+
+export type LockedInvestment = {
+  id: string;
+  user_id: string;
+  source_user_vip_id: string | null;
+  locked_plan_id: string | null;
+  plan_name: string;
+  investment_amount: number;
+  daily_income: number;
+  duration_days: number;
+  total_return: number;
+  locked_at: string;
+  claim_at: string;
+  days_paid: number;
+  accrued_income: number;
+  is_claimed: boolean;
+  claimed_at: string | null;
+  created_at: string;
+};
+
+export type LockedPlan = {
+  id: string;
+  name: string;
+  investment_amount: number;
+  daily_income: number;
+  duration_days: number;
+  total_return: number;
+  sort_order: number;
+  is_active: boolean;
+};
