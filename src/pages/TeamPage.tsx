@@ -85,7 +85,7 @@ export function TeamPage() {
         {/* Level summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           {[
-            { label: 'Lv1', count: members.level1.length, pct: '10%' },
+            { label: 'Lv1', count: members.level1.length, pct: '20%' },
             { label: 'Lv2', count: members.level2.length, pct: '5%' },
             { label: 'Lv3', count: members.level3.length, pct: '2%' },
           ].map(({ label, count, pct }) => (
@@ -148,7 +148,7 @@ export function TeamPage() {
         <div className="bg-muted/30 rounded-xl p-4 mb-4 text-xs text-muted-foreground space-y-1.5">
           <div className="flex items-start gap-1.5">
             <Info className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-            <span>Level 1: You earn <span className="text-primary font-semibold">10%</span> when your direct referral deposits.</span>
+            <span>Level 1: You earn <span className="text-primary font-semibold">20%</span> when your direct referral deposits.</span>
           </div>
           <div className="flex items-start gap-1.5">
             <Info className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
